@@ -10,6 +10,7 @@ namespace YouPipeDownloader
     {
         private Model model = new Model();
 
+        //ЮРЛ адрес вида https://www.youtube.com/watch?v=K61-tK7Xlzg&list=PLJ49GBcP7B3Yewnj-zKuYGABUU3sQpyMt&index=2&t=0s
         private string _inputUrl;
 
         public string InputUrl
@@ -30,6 +31,7 @@ namespace YouPipeDownloader
             }
         }
 
+        //идентификатор видео "K61-tK7Xlzg"
         private string _idSong;
 
         public string IdSong
@@ -45,6 +47,7 @@ namespace YouPipeDownloader
             }
         }
 
+        //идентификатор плэйлиста "PLJ49GBcP7B3Yewnj-zKuYGABUU3sQpyMt"
         private string _idPlaylist;
 
         public string IdPlaylist
@@ -87,7 +90,7 @@ namespace YouPipeDownloader
 
             set
             {
-                _playlist = value;
+                SetProperty(ref _playlist, value);
             }
         }
 
@@ -157,17 +160,15 @@ namespace YouPipeDownloader
 
         public async void DownloadButton_Click()
         {
-            if (String.IsNullOrEmpty(IdPlaylist))
+            if (!String.IsNullOrEmpty(IdPlaylist))
             {
-                return;
+                Playlist = await model.GetPlaylist(IdPlaylist);
             }
-            Playlist = await model.GetPlaylist(IdPlaylist);
-            RaisePropertyChanged(nameof(Playlist));
+          
         }
 
         public async void ItemPlaylistClick(object sender, ItemClickEventArgs e)
         {
-           
             AudioTrackProperties audioTrackProperties = e.ClickedItem as AudioTrackProperties;
 
             Title = audioTrackProperties.Title;
