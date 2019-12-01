@@ -6,26 +6,29 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" d:DesignWidth="1045" d:DesignHeight="620">
 
     <Grid Background="{ThemeResource AppBarBorderThemeBrush}">
-        <Grid Height="100" BorderThickness="1,1,1,1" Padding="0,0,0,0" BorderBrush="Black" Margin="40,105,40,515">
+        <Grid BorderThickness="1,1,1,1" BorderBrush="Black" Margin="40,85,40,0" VerticalAlignment="Top" Height="110">
+
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="700" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Image  Grid.Column="0" Source="{x:Bind ViewModel.Thumbnail, Mode=TwoWay}" />
+            <Image Grid.Column="0" Margin="1,1,1,1" Source="{x:Bind ViewModel.Thumbnail,Mode=TwoWay}" Stretch="Uniform" />
 
-            <StackPanel Grid.Column="1" Margin="6,6,8,6">
+            <StackPanel Grid.Column="1" Margin="7,7,7,7" Grid.RowSpan="2">
                 <TextBlock Text="{x:Bind ViewModel.Title, Mode=TwoWay}"  TextWrapping="NoWrap" Height="20" />
-                <TextBlock Text="{x:Bind ViewModel.Description, Mode=TwoWay}" TextWrapping="NoWrap" Height="20" />
+                <TextBlock Text="{x:Bind ViewModel.Description, Mode=TwoWay}" TextWrapping="Wrap" Height="50" TextTrimming="CharacterEllipsis" />
                 <TextBlock Text="{x:Bind ViewModel.Duration, Mode=TwoWay}" TextWrapping="NoWrap" Height="20" />
             </StackPanel>
+            <Button Content="Download" Grid.Column="2" Width="90" Height="32" Margin="27,0,0,0"/>
         </Grid>
-        <Button Content="Search" Margin="1150,30,0,0" VerticalAlignment="Top" Click="{x:Bind ViewModel.DownloadButton_Click}" />
-        <TextBox HorizontalAlignment="Left" Margin="615,30,0,0" Text="{x:Bind ViewModel.InputUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Width="500" PlaceholderText="Input http string" />
+        <Button Content="Search" Margin="0,30,43,0" VerticalAlignment="Top" Click="{x:Bind ViewModel.DownloadButton_Click}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" VerticalContentAlignment="Top" Height="32" />
+        <TextBox Margin="0,30,125,0" Text="{x:Bind ViewModel.InputUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Input http string" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right" Width="500" Height="32" VerticalAlignment="Top" />
 
-        <ListView Margin="40,225,40,130" ItemsSource ="{x:Bind ViewModel.Playlist,Mode=TwoWay}" SelectedItem="{x:Bind ViewModel.ItemPlaylistSelect, Mode=TwoWay}" IsItemClickEnabled="True" ItemClick="{x:Bind ViewModel.ItemPlaylistClick}" BorderThickness="1,1,1,1" BorderBrush="Black">
+        <ListView Margin="40,213,40,10" ItemsSource ="{x:Bind ViewModel.Playlist,Mode=TwoWay}" SelectedItem="{x:Bind ViewModel.ItemPlaylistSelect, Mode=TwoWay}" IsItemClickEnabled="True" ItemClick="{x:Bind ViewModel.ItemPlaylistClick}" BorderThickness="1,1,1,1" BorderBrush="Black">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="local:AudioTrackProperties">
                     <Grid>

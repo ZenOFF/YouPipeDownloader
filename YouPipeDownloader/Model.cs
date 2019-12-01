@@ -9,7 +9,7 @@ namespace YouPipeDownloader
     {
         private string TempFolder = Path.Combine(Environment.CurrentDirectory, @"TempFolder\");
 
-        private int _countSongsInPlaylist = 10;
+        private int _countSongsInPlaylist = 50;
 
         public async void DownloadingSong(string IdSong)
         {
