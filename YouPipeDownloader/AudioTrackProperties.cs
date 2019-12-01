@@ -1,4 +1,5 @@
-﻿using Windows.UI.Xaml.Media.Imaging;
+﻿using System;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace YouPipeDownloader
 {
@@ -10,6 +11,6 @@ namespace YouPipeDownloader
         public string Description { get; set; }
 
         public string Duration { get; set; }
-         public string Thumbnail { get; set; }
+         public BitmapImage Thumbnail { get; set; }
     }
 }

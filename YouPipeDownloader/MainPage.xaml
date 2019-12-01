@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid Background="{ThemeResource AppBarBorderThemeBrush}">
         <Grid Height="100" BorderThickness="1,1,1,1" Padding="0,0,0,0" BorderBrush="Black" Margin="40,105,40,515">
@@ -14,11 +14,12 @@
                 <ColumnDefinition Width="200" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Image  Grid.Column="0" />
+            <Image  Grid.Column="0" Source="{x:Bind ViewModel.Thumbnail, Mode=TwoWay}" />
+
             <StackPanel Grid.Column="1" Margin="6,6,8,6">
-                <TextBlock Text="{x:Bind ViewModel.Title, Mode=TwoWay}"  TextWrapping="NoWrap" Height="20"/>
+                <TextBlock Text="{x:Bind ViewModel.Title, Mode=TwoWay}"  TextWrapping="NoWrap" Height="20" />
                 <TextBlock Text="{x:Bind ViewModel.Description, Mode=TwoWay}" TextWrapping="NoWrap" Height="20" />
-                <TextBlock Text="{x:Bind ViewModel.Duration, Mode=TwoWay}" TextWrapping="NoWrap" Height="20"/>
+                <TextBlock Text="{x:Bind ViewModel.Duration, Mode=TwoWay}" TextWrapping="NoWrap" Height="20" />
             </StackPanel>
         </Grid>
         <Button Content="Search" Margin="1150,30,0,0" VerticalAlignment="Top" Click="{x:Bind ViewModel.DownloadButton_Click}" />

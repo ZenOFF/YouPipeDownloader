@@ -17,7 +17,7 @@ namespace YouPipeDownloader
 
             await audioTrack.GetSong();
         }
-
+        //получение информации(описание, продолжительность, обложка) о видео по ID
         public async Task<AudioTrackProperties> GetVideoInfo(string Id)
         {
             AudioTrack audioTrack = new AudioTrack(Id);
@@ -25,7 +25,7 @@ namespace YouPipeDownloader
             audioTrackProperties = await audioTrack.GetInfo();
             return audioTrackProperties;
         }
-
+        //получение списка Playlist
         public async Task<ObservableCollection<AudioTrackProperties>> GetPlaylist(string PlaylistId)
         {
             Playlist playlist = new Playlist(_countSongsInPlaylist, PlaylistId);

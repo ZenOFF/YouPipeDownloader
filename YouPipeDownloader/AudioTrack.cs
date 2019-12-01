@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VideoLibrary;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.Web.Http;
 
 namespace YouPipeDownloader
@@ -67,12 +68,13 @@ namespace YouPipeDownloader
             //создаём экземляр класса СвойстАудиоДорожки
             AudioTrackProperties audioTrackProperties = new AudioTrackProperties();
             //выполняем запрос к API и получаем длительность аудио дорожки
-            var videoInfoString = await RequestAudioDurationAsync();           
+            var videoInfoString = await RequestAudioDurationAsync();
             audioTrackProperties.Duration = GetVideoDuration(videoInfoString);
             //выполняем запрос к API и получаем название и описание аудио дорожки
             videoInfoString = await RequestAudioInfoAsync();
             audioTrackProperties.Description = GetVideoDescription(videoInfoString);
-            audioTrackProperties.Thumbnail = GetVideoThumbnails(videoInfoString);
+
+            audioTrackProperties.Thumbnail = new BitmapImage(new Uri(GetVideoThumbnails(videoInfoString)));
             return audioTrackProperties;
         }
 
@@ -98,6 +100,7 @@ namespace YouPipeDownloader
 
             return default(dynamic);
         }
+
         private async Task<dynamic> RequestAudioInfoAsync()
         {
             var parameters = new Dictionary<string, string>
@@ -120,6 +123,7 @@ namespace YouPipeDownloader
 
             return default(dynamic);
         }
+
         private string MakeUrlWithQuery(string baseUrl, IEnumerable<KeyValuePair<string, string>> parameters) //формирует полный юрл с параметрами
         {
             if (string.IsNullOrEmpty(baseUrl))
@@ -143,6 +147,7 @@ namespace YouPipeDownloader
                 }
             return Duration;
         }
+
         public string GetVideoDescription(dynamic NonFormatingString)
         {
             string Description = "";
@@ -166,6 +171,7 @@ namespace YouPipeDownloader
                 }
             return ThumbnailUrl;
         }
+
         //private async void SelectSourceBtn_Click(object sender, RoutedEventArgs e)
         //{
         //    var openPicker = new Windows.Storage.Pickers.FileOpenPicker();

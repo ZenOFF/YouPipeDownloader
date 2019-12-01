@@ -3,6 +3,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace YouPipeDownloader
 {
@@ -64,9 +65,10 @@ namespace YouPipeDownloader
             }
         }
 
-        public string _thumbnail;
+        //Обложка видео
+        public BitmapImage _thumbnail;
 
-        public string Thumbnail
+        public BitmapImage Thumbnail
         {
             get
             {
@@ -79,6 +81,7 @@ namespace YouPipeDownloader
             }
         }
 
+        //список Playlist
         private ObservableCollection<AudioTrackProperties> _playlist;
 
         public ObservableCollection<AudioTrackProperties> Playlist
@@ -96,6 +99,7 @@ namespace YouPipeDownloader
 
         private AudioTrackProperties _itemPlaylistSelect;
 
+        //выбранный элемент ListView
         public AudioTrackProperties ItemPlaylistSelect
         {
             get
@@ -111,6 +115,7 @@ namespace YouPipeDownloader
 
         private string _title;
 
+        //Заголовок
         public string Title
         {
             get
@@ -124,6 +129,7 @@ namespace YouPipeDownloader
             }
         }
 
+        //Описание
         private string _description;
 
         public string Description
@@ -139,6 +145,7 @@ namespace YouPipeDownloader
             }
         }
 
+        //Продолжительность
         private string _duration;
 
         public string Duration
@@ -158,15 +165,16 @@ namespace YouPipeDownloader
         {
         }
 
+        //кнопка получения информации по Id
         public async void DownloadButton_Click()
         {
             if (!String.IsNullOrEmpty(IdPlaylist))
             {
                 Playlist = await model.GetPlaylist(IdPlaylist);
             }
-          
         }
 
+        //нажатие по выбраному элементу ListView и заполнение свойст Title,IdSong,Description,Duration,Thumbnail
         public async void ItemPlaylistClick(object sender, ItemClickEventArgs e)
         {
             AudioTrackProperties audioTrackProperties = e.ClickedItem as AudioTrackProperties;
@@ -178,6 +186,7 @@ namespace YouPipeDownloader
             Description = audioTrackProperties.Description;
             Duration = audioTrackProperties.Duration;
             Thumbnail = audioTrackProperties.Thumbnail;
+            RaisePropertyChanged(nameof(Thumbnail));
         }
 
         //RegEx для форматирования юрл адреса и получения IdVideo и IdPlaylist
@@ -190,8 +199,8 @@ namespace YouPipeDownloader
             string Playlist = "";
             foreach (Match match in rgx.Matches(ComleteUrl))
             {
-                Video = match.Groups[1].Value.ToString();//High
-                Playlist = match.Groups[2].Value.ToString(); //Low
+                Video = match.Groups[1].Value.ToString();
+                Playlist = match.Groups[2].Value.ToString();
             }
             switch (typeId)
             {
