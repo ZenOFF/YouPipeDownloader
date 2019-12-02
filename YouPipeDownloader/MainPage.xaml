@@ -23,7 +23,7 @@
                 <TextBlock Text="{x:Bind ViewModel.Description, Mode=TwoWay}" TextWrapping="Wrap" Height="50" TextTrimming="CharacterEllipsis" />
                 <TextBlock Text="{x:Bind ViewModel.Duration, Mode=TwoWay}" TextWrapping="NoWrap" Height="20" />
             </StackPanel>
-            <Button Content="Download" Grid.Column="2" Width="90" Height="32" Margin="27,0,0,0"/>
+            <Button Content="Download" Grid.Column="2" Width="90" Height="32" Margin="27,0,0,0" Visibility="{x:Bind ViewModel.VisibilityDownloadButton, Mode=TwoWay}"/>
         </Grid>
         <Button Content="Search" Margin="0,30,43,0" VerticalAlignment="Top" Click="{x:Bind ViewModel.DownloadButton_Click}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" VerticalContentAlignment="Top" Height="32" />
         <TextBox Margin="0,30,125,0" Text="{x:Bind ViewModel.InputUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Input http string" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right" Width="500" Height="32" VerticalAlignment="Top" />

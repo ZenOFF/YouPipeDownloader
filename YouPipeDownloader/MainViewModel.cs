@@ -2,6 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
 
@@ -22,10 +23,10 @@ namespace YouPipeDownloader
             }
             set
             {
-                IdSong = GetIdFromUrl(TypeId.Video, value);
+                IdSong = GetVideoIdFromUrl(value);
                 RaisePropertyChanged(nameof(IdSong));
 
-                IdPlaylist = GetIdFromUrl(TypeId.Playlist, value);
+                IdPlaylist = GetPlaylistIdFromUrl(value);
                 RaisePropertyChanged(nameof(IdPlaylist));
 
                 SetProperty(ref _inputUrl, value);
@@ -120,6 +121,14 @@ namespace YouPipeDownloader
         {
             get
             {
+                if (!String.IsNullOrEmpty(_title))
+                {
+                    VisibilityDownloadButton = Visibility.Visible;
+                }
+                else
+                {
+                    VisibilityDownloadButton = Visibility.Collapsed;
+                }
                 return _title;
             }
 
@@ -161,6 +170,20 @@ namespace YouPipeDownloader
             }
         }
 
+        private Visibility _visibilityDownloadButton = Visibility.Visible;
+
+        public Visibility VisibilityDownloadButton
+        {
+            get
+            {
+                return _visibilityDownloadButton;
+            }
+            set
+            {
+                SetProperty(ref _visibilityDownloadButton, value);
+            }
+        }
+
         public MainViewModel()
         {
         }
@@ -190,24 +213,42 @@ namespace YouPipeDownloader
         }
 
         //RegEx для форматирования юрл адреса и получения IdVideo и IdPlaylist
-        private string GetIdFromUrl(TypeId typeId, string Url)
+        private string GetVideoIdFromUrl(string Url)
         {
-            string ComleteUrl = Url + "&index";
-            //https://www.youtube.com/watch?v=K61-tK7Xlzg&list=PLJ49GBcP7B3Yewnj-zKuYGABUU3sQpyMt&index=2&t=0s
-            Regex rgx = new Regex($@"watch.v=(.+)&list=(.+)&index"); //поиск значений
-            string Video = "";
-            string Playlist = "";
-            foreach (Match match in rgx.Matches(ComleteUrl))
+            Regex IndexSearch = new Regex($@"&index"); //поиск значений
+
+            if (!IndexSearch.IsMatch(Url))
             {
-                Video = match.Groups[1].Value.ToString();
-                Playlist = match.Groups[2].Value.ToString();
+                Url = Url + "&list";
             }
-            switch (typeId)
+
+            Regex rgx = new Regex($@"watch.v=(.+)&list"); //поиск значений
+            string Id = "";
+
+            foreach (Match match in rgx.Matches(Url))
             {
-                case TypeId.Video: return Video;
-                case TypeId.Playlist: return Playlist;
-                default: return null;
+                Id = match.Groups[1].Value.ToString();
             }
+            return Id;
+        }
+
+        private string GetPlaylistIdFromUrl(string Url)
+        {
+            Regex IndexSearch = new Regex($@"&index"); //поиск значений
+
+            if (!IndexSearch.IsMatch(Url))
+            {
+                Url = Url + "&index";
+            }
+
+            Regex rgx = new Regex($@"list=(.+)&index"); //поиск значений
+            string Id = "";
+
+            foreach (Match match in rgx.Matches(Url))
+            {
+                Id = match.Groups[1].Value.ToString();
+            }
+            return Id;
         }
     }
 }
