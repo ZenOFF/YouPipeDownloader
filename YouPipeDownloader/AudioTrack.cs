@@ -4,6 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using VideoLibrary;
+using Windows.Media.MediaProperties;
+using Windows.Media.Transcoding;
+using Windows.Storage;
+using Windows.UI.Popups;
 using Windows.UI.Xaml.Media.Imaging;
 using Windows.Web.Http;
 
@@ -12,6 +16,7 @@ namespace YouPipeDownloader
     internal class AudioTrack
     {
         private string _idSong;
+        private string _title;
 
         public delegate void updDel();
 
@@ -20,47 +25,27 @@ namespace YouPipeDownloader
             _idSong = IdSong;
         }
 
-        public async Task<dynamic> GetSong(string UrlYouTube = "https://www.youtube.com/watch?v=")
+        public AudioTrack(string IdSong, string Title) : this(IdSong)
+        {
+            _title = Title;
+        }
+
+        public async Task SaveAudioTrack(string UrlYouTube = "https://www.youtube.com/watch?v=")
         {
             var youtube = YouTube.Default;
-
             //загрука видео в кэш
             var vid = await youtube.GetVideoAsync(String.Concat(UrlYouTube, _idSong));
-            // onUpdateEnd();
+            byte[] videoByte = await vid.GetBytesAsync();
+            //создание временного файла
+            StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
+            StorageFile videoFile = await tempFolder.CreateFileAsync(_idSong, CreationCollisionOption.ReplaceExisting);
+            //сохранение
+            await FileIO.WriteBytesAsync(videoFile, videoByte);
 
-            //сохранение видео в _tempFolder
-            //using (FileStream SourceStream = File.Open(_tempFolder + vid.FullName, FileMode.OpenOrCreate))
-            //{
-            //    SourceStream.Seek(0, SeekOrigin.End);
-            //    byte[] bt = await vid.GetBytesAsync();
+            await StartConvertAudioFile(videoFile);
 
-            //    await SourceStream.WriteAsync(bt, 0, bt.Length);
-            //}
-            //// onUpdateEnd();
-
-            //var inputFile = new MediaFile { Filename = _tempFolder + vid.FullName };
-            //var outputFile = new MediaFile { Filename = _saveFolder + $"{vid.FullName}.mp3" };
-
-            //using (var engine = new Engine())
-            //{
-            //    await Task.Run(() =>
-            //    {
-            //        engine.GetMetadata(inputFile);
-            //        engine.Convert(inputFile, outputFile);
-            //        Console.WriteLine("Конвертирование завершено");
-            //    });
-            //}
-
-            //if (File.Exists(outputFile.Filename))
-            //{
-            //    await Task.Run(() =>
-            //    {
-            //        File.Delete(inputFile.Filename);
-            //        Console.WriteLine("Временный файл удалён");
-            //    });
-            //}
-            //// onUpdateEnd();
-            return default(dynamic);
+            MessageDialog messageDialog = new MessageDialog("Converting is done");
+            await messageDialog.ShowAsync();
         }
 
         public async Task<AudioTrackProperties> GetInfo(string UrlYouTube = "https://www.youtube.com/watch?v=")
@@ -172,112 +157,49 @@ namespace YouPipeDownloader
             return ThumbnailUrl;
         }
 
-        //private async void SelectSourceBtn_Click(object sender, RoutedEventArgs e)
-        //{
-        //    var openPicker = new Windows.Storage.Pickers.FileOpenPicker();
+        private async Task<StorageFile> SelectTargetFile()
+        {
+            try
+            {
+                var savePicker = new Windows.Storage.Pickers.FileSavePicker();
 
-        //    openPicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.MusicLibrary;
-        //    foreach (var audioTypeItem in ViewModel.AudioTypeList)
-        //    {
-        //        openPicker.FileTypeFilter.Add($".{audioTypeItem}");
-        //    }
+                savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.MusicLibrary;
+                savePicker.DefaultFileExtension = ".mp3";
+                savePicker.SuggestedFileName = _title;
+                savePicker.FileTypeChoices.Add(".MP3", new List<string>() { ".mp3" });
+                return await savePicker.PickSaveFileAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"An error had been throwed, {ex.Message}");
+                return null;
+            }
+        }
 
-        //    ViewModel.SourceFile = await openPicker.PickSingleFileAsync();
-        //}
-
-        //private async Task SelectTargetFile()
-        //{
-        //    try
-        //    {
-        //        var savePicker = new Windows.Storage.Pickers.FileSavePicker();
-
-        //        savePicker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.MusicLibrary;
-        //        savePicker.DefaultFileExtension = $".{ViewModel.SelectedAudioType}".ToLower();
-        //        savePicker.SuggestedFileName = $"{ViewModel.SourceFile.DisplayName}";
-        //        savePicker.FileTypeChoices.Add(ViewModel.SelectedAudioType.ToString(), new string[] { $".{ViewModel.SelectedAudioType.ToString().ToLower()}" });
-
-        //        ViewModel.TargetFile = await savePicker.PickSaveFileAsync();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Alert($"An error had been throwed, {ex.Message}");
-        //    }
-        //}
-
-        //private MediaEncodingProfile DetermineMediaEncodingProfile()
-        //{
-        //    MediaEncodingProfile profile = null;
-
-        //    switch (ViewModel.SelectedAudioType)
-        //    {
-        //        case AudioFormat.MP4:
-        //        case AudioFormat.AAC:
-        //        case AudioFormat.M4A:
-        //            profile = MediaEncodingProfile.CreateM4a(ViewModel.SelectedQuality);
-        //            break;
-        //        case AudioFormat.MP3:
-        //            profile = MediaEncodingProfile.CreateMp3(ViewModel.SelectedQuality);
-        //            break;
-        //        case AudioFormat.WMA:
-        //            profile = MediaEncodingProfile.CreateWma(ViewModel.SelectedQuality);
-        //            break;
-        //    }
-
-        //    return profile;
-        //}
-
-        //private async Task StartConvertAudioFile()
-        //{
-        //    ViewModel.ProcessBarVisable = Visibility.Visible;
-        //    ViewModel.ConvertLog = $"Start Convert{Environment.NewLine}";
-
-        //    try
-        //    {
-        //        //determine MediaEncodingProfiel
-        //        MediaEncodingProfile profile = DetermineMediaEncodingProfile();
-
-        //        //init convert workder object
-        //        MediaTranscoder transcoder = new MediaTranscoder();
-        //        PrepareTranscodeResult prepareOp = await transcoder.PrepareFileTranscodeAsync(ViewModel.SourceFile, ViewModel.TargetFile, profile);
-        //        if (prepareOp.CanTranscode)
-        //        {
-        //            //start convert
-        //            var transcodeOp = prepareOp.TranscodeAsync();
-
-        //            //registers progress event handler
-        //            transcodeOp.Progress += async (IAsyncActionWithProgress<double> asyncInfo, double percent) =>
-        //            {
-        //                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-        //                {
-        //                    ViewModel.RateOfProgress = percent;
-        //                    ViewModel.ConvertLog += $"Progressed {(int)percent}%{Environment.NewLine}";
-        //                });
-        //            };
-
-        //            //registers completed event handler
-        //            transcodeOp.Completed += async (IAsyncActionWithProgress<double> asyncInfo, AsyncStatus status) =>
-        //            {
-        //                asyncInfo.GetResults();
-        //                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-        //                {
-        //                    ViewModel.ProcessBarVisable = Visibility.Collapsed;
-        //                    ViewModel.ConvertLog += $"convert has been {status}";
-        //                    if (status == AsyncStatus.Error)
-        //                    {
-        //                        Alert($"Convert failed, error code is {asyncInfo.ErrorCode}");
-        //                    }
-        //                });
-        //            };
-        //        }
-        //        else
-        //        {
-        //            Alert($"Can not convert this file from {ViewModel.SourceFile.FileType} to {ViewModel.TargetFile.FileType}");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Alert($"An error had been throwed, {ex.Message}");
-        //    }
-        //}
+        private async Task StartConvertAudioFile(StorageFile VideoOnDisk)
+        {
+            StorageFile DestinationFile = await SelectTargetFile();
+            if (DestinationFile == null)
+            {
+                return;
+            }
+            try
+            {
+                //determine MediaEncodingProfiel
+                MediaEncodingProfile profile = MediaEncodingProfile.CreateMp3(AudioEncodingQuality.High);
+                //init convert workder object
+                MediaTranscoder transcoder = new MediaTranscoder();
+                PrepareTranscodeResult prepareOp = await transcoder.PrepareFileTranscodeAsync(VideoOnDisk, DestinationFile, profile);
+                if (prepareOp.CanTranscode)
+                {
+                    //start convert
+                    await prepareOp.TranscodeAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"An error had been throwed, {ex.Message}");
+            }
+        }
     }
 }

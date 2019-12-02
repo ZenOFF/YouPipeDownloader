@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.IO;
+﻿using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace YouPipeDownloader
 {
     internal class Model
     {
-        private string TempFolder = Path.Combine(Environment.CurrentDirectory, @"TempFolder\");
-
         private int _countSongsInPlaylist = 50;
 
-        public async void DownloadingSong(string IdSong)
+        public async Task DownloadingSong(string IdSong, string Title)
         {
-            AudioTrack audioTrack = new AudioTrack(IdSong);
-
-            await audioTrack.GetSong();
+            AudioTrack audioTrack = new AudioTrack(IdSong, Title);
+            await audioTrack.SaveAudioTrack();
         }
+
         //получение информации(описание, продолжительность, обложка) о видео по ID
         public async Task<AudioTrackProperties> GetVideoInfo(string Id)
         {
@@ -25,6 +21,7 @@ namespace YouPipeDownloader
             audioTrackProperties = await audioTrack.GetInfo();
             return audioTrackProperties;
         }
+
         //получение списка Playlist
         public async Task<ObservableCollection<AudioTrackProperties>> GetPlaylist(string PlaylistId)
         {

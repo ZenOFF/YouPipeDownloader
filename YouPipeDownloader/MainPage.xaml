@@ -23,9 +23,12 @@
                 <TextBlock Text="{x:Bind ViewModel.Description, Mode=TwoWay}" TextWrapping="Wrap" Height="50" TextTrimming="CharacterEllipsis" />
                 <TextBlock Text="{x:Bind ViewModel.Duration, Mode=TwoWay}" TextWrapping="NoWrap" Height="20" />
             </StackPanel>
-            <Button Content="Download" Grid.Column="2" Width="90" Height="32" Margin="27,0,0,0" Visibility="{x:Bind ViewModel.VisibilityDownloadButton, Mode=TwoWay}"/>
+            <Button Content="Download" Grid.Column="2" Width="90" Height="32" Margin="27,0,0,0" 
+                    Visibility="{x:Bind ViewModel.VisibilityDownloadButton, Mode=TwoWay}" 
+                    Click="{x:Bind ViewModel.DownloadButton_Click}"
+                    IsEnabled="{x:Bind ViewModel.DownloadButtonEnabled, Mode=TwoWay}"/>
         </Grid>
-        <Button Content="Search" Margin="0,30,43,0" VerticalAlignment="Top" Click="{x:Bind ViewModel.DownloadButton_Click}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" VerticalContentAlignment="Top" Height="32" />
+        <Button Content="Search" Margin="0,30,43,0" VerticalAlignment="Top" Click="{x:Bind ViewModel.SearchButton_Click}" HorizontalContentAlignment="Right" HorizontalAlignment="Right" VerticalContentAlignment="Top" Height="32" />
         <TextBox Margin="0,30,125,0" Text="{x:Bind ViewModel.InputUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" PlaceholderText="Input http string" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right" Width="500" Height="32" VerticalAlignment="Top" />
 
         <ListView Margin="40,213,40,10" ItemsSource ="{x:Bind ViewModel.Playlist,Mode=TwoWay}" SelectedItem="{x:Bind ViewModel.ItemPlaylistSelect, Mode=TwoWay}" IsItemClickEnabled="True" ItemClick="{x:Bind ViewModel.ItemPlaylistClick}" BorderThickness="1,1,1,1" BorderBrush="Black">

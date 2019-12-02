@@ -184,16 +184,40 @@ namespace YouPipeDownloader
             }
         }
 
+        private bool _downloadButtonEnabled=true;
+
+        public bool DownloadButtonEnabled
+        {
+            get
+            {
+                return _downloadButtonEnabled;
+            }
+            set
+            {
+                SetProperty(ref _downloadButtonEnabled, value);
+            }
+        }
+
         public MainViewModel()
         {
         }
 
         //кнопка получения информации по Id
-        public async void DownloadButton_Click()
+        public async void SearchButton_Click()
         {
             if (!String.IsNullOrEmpty(IdPlaylist))
             {
                 Playlist = await model.GetPlaylist(IdPlaylist);
+            }
+        }
+
+        public async void DownloadButton_Click()
+        {
+            if (!String.IsNullOrEmpty(IdSong))
+            {
+                DownloadButtonEnabled = false;
+                await model.DownloadingSong(IdSong, Title);
+                DownloadButtonEnabled = true;
             }
         }
 
