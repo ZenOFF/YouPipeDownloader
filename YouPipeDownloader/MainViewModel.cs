@@ -2,6 +2,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
@@ -19,33 +20,32 @@ namespace YouPipeDownloader
         {
             get
             {
+                if (_inputUrl != null)
+                {
+                    IdVideo = GetVideoIdFromUrl(_inputUrl);
+                    IdPlaylist = GetPlaylistIdFromUrl(_inputUrl);
+                }
+
                 return _inputUrl;
             }
             set
             {
-                IdSong = GetVideoIdFromUrl(value);
-                RaisePropertyChanged(nameof(IdSong));
-
-                IdPlaylist = GetPlaylistIdFromUrl(value);
-                RaisePropertyChanged(nameof(IdPlaylist));
-
                 SetProperty(ref _inputUrl, value);
             }
         }
 
         //идентификатор видео "K61-tK7Xlzg"
-        private string _idSong;
+        private string _idVideo;
 
-        public string IdSong
+        public string IdVideo
         {
             get
             {
-                return _idSong;
+                return _idVideo;
             }
             set
             {
-                _idSong = value;
-                RaisePropertyChanged(nameof(IdSong));
+                SetProperty(ref _idVideo, value);
             }
         }
 
@@ -98,9 +98,9 @@ namespace YouPipeDownloader
             }
         }
 
+        //выбранный элемент ListView
         private AudioTrackProperties _itemPlaylistSelect;
 
-        //выбранный элемент ListView
         public AudioTrackProperties ItemPlaylistSelect
         {
             get
@@ -114,9 +114,9 @@ namespace YouPipeDownloader
             }
         }
 
+        //Заголовок
         private string _title;
 
-        //Заголовок
         public string Title
         {
             get
@@ -170,6 +170,7 @@ namespace YouPipeDownloader
             }
         }
 
+        // видимость кнопки Download
         private Visibility _visibilityDownloadButton = Visibility.Visible;
 
         public Visibility VisibilityDownloadButton
@@ -184,7 +185,8 @@ namespace YouPipeDownloader
             }
         }
 
-        private bool _downloadButtonEnabled=true;
+        // блокировка кнопки Download вов ремя работы
+        private bool _downloadButtonEnabled = true;
 
         public bool DownloadButtonEnabled
         {
@@ -202,23 +204,41 @@ namespace YouPipeDownloader
         {
         }
 
-        //кнопка получения информации по Id
+        // нажатие на кнопку Search
         public async void SearchButton_Click()
         {
+            RaisePropertyChanged("InputUrl");
+            if (!String.IsNullOrEmpty(IdVideo))
+            {
+                await GetInfoVideoFromInputUrl();
+            }
             if (!String.IsNullOrEmpty(IdPlaylist))
             {
                 Playlist = await model.GetPlaylist(IdPlaylist);
             }
         }
 
+        // нажатие на кнопку Download
         public async void DownloadButton_Click()
         {
-            if (!String.IsNullOrEmpty(IdSong))
+            if (!String.IsNullOrEmpty(IdVideo))
             {
                 DownloadButtonEnabled = false;
-                await model.DownloadingSong(IdSong, Title);
+                await model.DownloadingSong(IdVideo, Title);
                 DownloadButtonEnabled = true;
             }
+        }
+
+        //получение информации о видео по id из InputUrl
+        public async Task GetInfoVideoFromInputUrl()
+        {
+            AudioTrackProperties audioTrackProperties = new AudioTrackProperties();
+
+            audioTrackProperties = await model.GetVideoInfo(this.IdVideo);
+            Title = audioTrackProperties.Title;
+            Description = audioTrackProperties.Description;
+            Duration = audioTrackProperties.Duration;
+            Thumbnail = audioTrackProperties.Thumbnail;
         }
 
         //нажатие по выбраному элементу ListView и заполнение свойст Title,IdSong,Description,Duration,Thumbnail
@@ -226,20 +246,19 @@ namespace YouPipeDownloader
         {
             AudioTrackProperties audioTrackProperties = e.ClickedItem as AudioTrackProperties;
 
-            Title = audioTrackProperties.Title;
-            IdSong = audioTrackProperties.Id;
+            IdVideo = audioTrackProperties.Id;
 
-            audioTrackProperties = await model.GetVideoInfo(IdSong);
+            audioTrackProperties = await model.GetVideoInfo(IdVideo);
+            Title = audioTrackProperties.Title;
             Description = audioTrackProperties.Description;
             Duration = audioTrackProperties.Duration;
             Thumbnail = audioTrackProperties.Thumbnail;
-            RaisePropertyChanged(nameof(Thumbnail));
         }
 
         //RegEx для форматирования юрл адреса и получения IdVideo и IdPlaylist
         private string GetVideoIdFromUrl(string Url)
         {
-            Regex IndexSearch = new Regex($@"&index"); //поиск значений
+            Regex IndexSearch = new Regex($@"&list"); //поиск значений
 
             if (!IndexSearch.IsMatch(Url))
             {

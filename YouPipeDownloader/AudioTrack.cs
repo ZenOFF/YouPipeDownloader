@@ -57,8 +57,9 @@ namespace YouPipeDownloader
             audioTrackProperties.Duration = GetVideoDuration(videoInfoString);
             //выполняем запрос к API и получаем название и описание аудио дорожки
             videoInfoString = await RequestAudioInfoAsync();
+            audioTrackProperties.Title = GetVideoTitle(videoInfoString);
             audioTrackProperties.Description = GetVideoDescription(videoInfoString);
-
+            //выполняем запрос к API и получаем адрес к Thumbnail
             audioTrackProperties.Thumbnail = new BitmapImage(new Uri(GetVideoThumbnails(videoInfoString)));
             return audioTrackProperties;
         }
@@ -93,7 +94,7 @@ namespace YouPipeDownloader
                 ["key"] = "AIzaSyCIz-FuHD1jBmF7jcygpWQbruoquUpJOP8",
                 ["id"] = _idSong,
                 ["part"] = "snippet",
-                ["fields"] = "items/snippet(description),items/snippet/thumbnails/default(url)",
+                ["fields"] = "items/snippet(title,description),items/snippet/thumbnails/default(url)",
             };
 
             string baseUrl = "https://www.googleapis.com/youtube/v3/videos?";
@@ -133,6 +134,17 @@ namespace YouPipeDownloader
             return Duration;
         }
 
+        public string GetVideoTitle(dynamic NonFormatingString)
+        {
+            string Title = "";
+            if (NonFormatingString.items.Count > 0)
+
+                foreach (var item in NonFormatingString.items)
+                {
+                    Title = item.snippet.title.ToString();
+                }
+            return Title;
+        }
         public string GetVideoDescription(dynamic NonFormatingString)
         {
             string Description = "";
