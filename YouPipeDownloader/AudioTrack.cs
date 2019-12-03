@@ -38,14 +38,11 @@ namespace YouPipeDownloader
             byte[] videoByte = await vid.GetBytesAsync();
             //создание временного файла
             StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
-            StorageFile videoFile = await tempFolder.CreateFileAsync(_idSong, CreationCollisionOption.ReplaceExisting);
+            StorageFile videoFile = await tempFolder.CreateFileAsync(_idSong+".mp4", CreationCollisionOption.ReplaceExisting);
             //сохранение
             await FileIO.WriteBytesAsync(videoFile, videoByte);
 
             await StartConvertAudioFile(videoFile);
-
-            MessageDialog messageDialog = new MessageDialog("Converting is done");
-            await messageDialog.ShowAsync();
         }
 
         public async Task<AudioTrackProperties> GetInfo(string UrlYouTube = "https://www.youtube.com/watch?v=")
@@ -145,6 +142,7 @@ namespace YouPipeDownloader
                 }
             return Title;
         }
+
         public string GetVideoDescription(dynamic NonFormatingString)
         {
             string Description = "";
@@ -212,6 +210,10 @@ namespace YouPipeDownloader
             {
                 System.Diagnostics.Debug.WriteLine($"An error had been throwed, {ex.Message}");
             }
+            //удаление TempVideo
+            await VideoOnDisk.DeleteAsync();
+            MessageDialog messageDialog = new MessageDialog("Converting is done");
+            await messageDialog.ShowAsync();
         }
     }
 }
