@@ -32,17 +32,26 @@ namespace YouPipeDownloader
 
         public async Task SaveAudioTrack(string UrlYouTube = "https://www.youtube.com/watch?v=")
         {
-            var youtube = YouTube.Default;
-            //загрука видео в кэш
-            var vid = await youtube.GetVideoAsync(String.Concat(UrlYouTube, _idSong));
-            byte[] videoByte = await vid.GetBytesAsync();
-            //создание временного файла
-            StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
-            StorageFile videoFile = await tempFolder.CreateFileAsync(_idSong+".mp4", CreationCollisionOption.ReplaceExisting);
-            //сохранение
-            await FileIO.WriteBytesAsync(videoFile, videoByte);
+            try
+            {
+                var youtube = YouTube.Default;
+                //загрука видео в кэш
+                var vid = await youtube.GetVideoAsync(String.Concat(UrlYouTube, _idSong));
+                byte[] videoByte = await vid.GetBytesAsync();
+                //создание временного файла
+                StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
+                StorageFile videoFile = await tempFolder.CreateFileAsync(_idSong + ".mp4", CreationCollisionOption.ReplaceExisting);
+                //сохранение
+                await FileIO.WriteBytesAsync(videoFile, videoByte);
 
-            await StartConvertAudioFile(videoFile);
+                await StartConvertAudioFile(videoFile);
+            }
+            catch (System.InvalidOperationException)
+            {
+                MessageDialog messageDialog = new MessageDialog("Error download video, try again");
+                await messageDialog.ShowAsync();
+                return;
+            }
         }
 
         public async Task<AudioTrackProperties> GetInfo(string UrlYouTube = "https://www.youtube.com/watch?v=")
