@@ -57,6 +57,7 @@ namespace YouPipeDownloader
 
         public async Task<ObservableCollection<AudioTrackProperties>> GetIdVideosInPlayList()
         {
+            byte NumberInPlaylist = 1;
             ObservableCollection<AudioTrackProperties> VideoListWithId = new ObservableCollection<AudioTrackProperties>();
 
             var result = await GetPlayListAsync();
@@ -65,9 +66,10 @@ namespace YouPipeDownloader
                 foreach (var item in result.items)
                 {
                     AudioTrackProperties ListElement = new AudioTrackProperties();
-                    ListElement.Title = item.snippet.title.ToString();
+                    ListElement.Title = NumberInPlaylist.ToString() + ": " + item.snippet.title.ToString();
                     ListElement.Id = item.snippet.resourceId.videoId.ToString();
                     VideoListWithId.Add(ListElement);
+                    NumberInPlaylist++;
                 }
             return VideoListWithId;
         }
