@@ -8,7 +8,7 @@
 
   <Identity
     Name="fd659c5b-0c94-478b-9b34-177699a9e8be"
-    Publisher="CN=Admin"
+    Publisher="CN=ZenOFF"
     Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="fd659c5b-0c94-478b-9b34-177699a9e8be" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
