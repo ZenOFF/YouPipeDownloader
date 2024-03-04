@@ -1,19 +1,15 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using VideoLibrary;
 using Windows.Media.MediaProperties;
-using Windows.Media.Protection.PlayReady;
 using Windows.Media.Transcoding;
-using Windows.Networking.BackgroundTransfer;
 using Windows.Storage;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Media.Imaging;
@@ -134,7 +130,6 @@ namespace YouPipeDownloader
                 //get result byte array size
                 byte[] resultCombineArrays = Combine(continuation);
 
-    
                 //создание временного файла
                 StorageFolder tempFolder = ApplicationData.Current.TemporaryFolder;
                 StorageFile videoFile = await tempFolder.CreateFileAsync(_idSong + ".m4a", CreationCollisionOption.ReplaceExisting);
@@ -150,6 +145,7 @@ namespace YouPipeDownloader
                 return;
             }
         }
+
         private byte[] Combine(params byte[][] arrays)
         {
             byte[] rv = new byte[arrays.Sum(a => a.Length)];
@@ -183,7 +179,7 @@ namespace YouPipeDownloader
                 contentLenght = contentLenght - (rangeContentSize + 1);
                 result.Add(contentPart);
             }
-            if (contentLenght < rangeContentSize)
+            if (contentLenght < rangeContentSize && contentLenght > 0)
             {
                 ContentPart contentPart = new ContentPart();
                 contentPart.StartIndex = 0;
