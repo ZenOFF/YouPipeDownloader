@@ -13,6 +13,7 @@ using Windows.Media.Transcoding;
 using Windows.Storage;
 using Windows.UI.Popups;
 using Windows.UI.Xaml.Media.Imaging;
+using YouPipeDownloader.MappingResponse;
 
 namespace YouPipeDownloader
 {
@@ -32,70 +33,19 @@ namespace YouPipeDownloader
             _title = Title;
         }
 
-        public delegate void updDel();
+        //public delegate void updDel();
 
         public async Task<AudioTrackProperties> GetInfo(string UrlYouTube = "https://www.youtube.com/watch?v=")
         {
-            //создаём экземляр класса СвойстАудиоДорожки
-            AudioTrackProperties audioTrackProperties = new AudioTrackProperties();
-            //выполняем запрос к API и получаем длительность аудио дорожки
-            var videoInfoString = await RequestAudioDurationAsync();
-            audioTrackProperties.Duration = GetVideoDuration(videoInfoString);
             //выполняем запрос к API и получаем название и описание аудио дорожки
-            videoInfoString = await RequestAudioInfoAsync();
-            audioTrackProperties.Title = GetVideoTitle(videoInfoString);
-            audioTrackProperties.Description = GetVideoDescription(videoInfoString);
-            //выполняем запрос к API и получаем адрес к Thumbnail
-            audioTrackProperties.Thumbnail = new BitmapImage(new Uri(GetVideoThumbnails(videoInfoString)));
+            AudioTrackInfoApiResponse audioTrackInfoApiResponse = await RequestAudioInfoAsync();
+
+            AudioTrackProperties audioTrackProperties = new AudioTrackProperties();
+            audioTrackProperties.Title = audioTrackInfoApiResponse.Items.First<RootItems>().Snippet.Title;
+            audioTrackProperties.Description = audioTrackInfoApiResponse.Items.First<RootItems>().Snippet.Description;
+            audioTrackProperties.Duration = audioTrackInfoApiResponse.Items.First<RootItems>().Content.Duration;
+            audioTrackProperties.Thumbnail = new BitmapImage(new Uri(audioTrackInfoApiResponse.Items.First<RootItems>().Snippet.Thumbnails.Default.Url));
             return audioTrackProperties;
-        }
-
-        public string GetVideoDescription(dynamic NonFormatingString)
-        {
-            string Description = "";
-            if (NonFormatingString.items.Count > 0)
-
-                foreach (var item in NonFormatingString.items)
-                {
-                    Description = item.snippet.description.ToString();
-                }
-            return Description;
-        }
-
-        public string GetVideoDuration(dynamic NonFormatingString)
-        {
-            string Duration = "";
-            if (NonFormatingString.items.Count > 0)
-
-                foreach (var item in NonFormatingString.items)
-                {
-                    Duration = item.contentDetails.duration.ToString();
-                }
-            return Duration;
-        }
-
-        public string GetVideoThumbnails(dynamic NonFormatingString)
-        {
-            string ThumbnailUrl = "";
-            if (NonFormatingString.items.Count > 0)
-
-                foreach (var item in NonFormatingString.items)
-                {
-                    ThumbnailUrl = item.snippet.thumbnails.@default.url.ToString();
-                }
-            return ThumbnailUrl;
-        }
-
-        public string GetVideoTitle(dynamic NonFormatingString)
-        {
-            string Title = "";
-            if (NonFormatingString.items.Count > 0)
-
-                foreach (var item in NonFormatingString.items)
-                {
-                    Title = item.snippet.title.ToString();
-                }
-            return Title;
         }
 
         public async Task SaveAudioTrack(string UrlYouTube = "https://www.youtube.com/watch?v=")
@@ -200,51 +150,39 @@ namespace YouPipeDownloader
             return parameters.Aggregate(baseUrl,
                 (accumulated, kvp) => string.Format($"{accumulated}{kvp.Key}={kvp.Value}&"));
         }
-
-        private async Task<dynamic> RequestAudioDurationAsync()
+        /// <summary>
+        /// Отправляет запрос к апи гугла для получения данны о выбраном трэке
+        /// </summary>
+        /// <returns></returns>
+        private async Task<AudioTrackInfoApiResponse> RequestAudioInfoAsync()
         {
             var parameters = new Dictionary<string, string>
             {
                 ["key"] = "AIzaSyCIz-FuHD1jBmF7jcygpWQbruoquUpJOP8",
                 ["id"] = _idSong,
-                ["part"] = "contentDetails",
-                ["fields"] = "items/contentDetails(duration)",
+                ["part"] = "snippet, contentDetails",
+                ["fields"] = "items/snippet(title,description),items/snippet/thumbnails/default(url),items/contentDetails(duration)",
             };
 
             string baseUrl = "https://www.googleapis.com/youtube/v3/videos?";
             string fullUrl = MakeUrlWithQuery(baseUrl, parameters);
 
             var result = await new System.Net.Http.HttpClient().GetStringAsync(new Uri(fullUrl));
-
+            AudioTrackInfoApiResponse audioTrackInfoApiResponse = new AudioTrackInfoApiResponse();
             if (result != null)
             {
-                return JsonConvert.DeserializeObject(result);
+                try
+                {
+                    audioTrackInfoApiResponse = JsonConvert.DeserializeObject<AudioTrackInfoApiResponse>(result);
+                }
+                catch (Exception m)
+                {
+                    MessageDialog messageDialog = new MessageDialog("Error deserializing audio track information");
+                    await messageDialog.ShowAsync();
+                }
             }
 
-            return default(dynamic);
-        }
-
-        private async Task<dynamic> RequestAudioInfoAsync()
-        {
-            var parameters = new Dictionary<string, string>
-            {
-                ["key"] = "AIzaSyCIz-FuHD1jBmF7jcygpWQbruoquUpJOP8",
-                ["id"] = _idSong,
-                ["part"] = "snippet",
-                ["fields"] = "items/snippet(title,description),items/snippet/thumbnails/default(url)",
-            };
-
-            string baseUrl = "https://www.googleapis.com/youtube/v3/videos?";
-            string fullUrl = MakeUrlWithQuery(baseUrl, parameters);
-
-            var result = await new System.Net.Http.HttpClient().GetStringAsync(new Uri(fullUrl));
-
-            if (result != null)
-            {
-                return JsonConvert.DeserializeObject(result);
-            }
-
-            return default(dynamic);
+            return audioTrackInfoApiResponse;
         }
 
         private async Task<StorageFile> SelectTargetFile()

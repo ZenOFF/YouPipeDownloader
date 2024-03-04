@@ -129,8 +129,14 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Model\AudioTrackInfoApiResponse.cs" />
     <Compile Include="Model\AudioTrackProperties.cs" />
+    <Compile Include="Model\MappingResponse\ContentInfo.cs" />
     <Compile Include="Model\ContentPart.cs" />
+    <Compile Include="Model\MappingResponse\RootItems.cs" />
+    <Compile Include="Model\MappingResponse\SnippetInfo.cs" />
+    <Compile Include="Model\MappingResponse\ThumbnailsBase.cs" />
+    <Compile Include="Model\MappingResponse\ThumbnailsView.cs" />
     <Compile Include="View\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
